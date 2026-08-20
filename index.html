@@ -17,14 +17,19 @@
     overflow-x: hidden;
     position: relative;
   }
-  .hearts-bg {
+  .hearts-bg, .balloons-bg {
     position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none; z-index: 1; overflow: hidden;
   }
-  .heart {
-    position: absolute; font-size: 18px;
-    animation: fall linear infinite; opacity: 0.7;
+  .heart, .balloon {
+    position: absolute;
+    animation: fall linear infinite;
+    opacity: 0.75;
+  }
+  .balloon {
+    font-size: 14px; font-weight: 600;
+    color: #e91e63;
   }
   @keyframes fall {
     0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.8; }
@@ -49,18 +54,22 @@
   h1 { color: #e91e63; font-size: 23px; margin-bottom: 10px; }
   #message {
     color: #444; font-size: 15px;
-    margin-bottom: 12px; line-height: 1.5; min-height: 45px;
+    margin-bottom: 12px; line-height: 1.5; min-height: 48px;
   }
   #rejectText {
     background: #ffe6ee;
     color: #e91e63;
     font-size: 16px; font-weight: 700;
     padding: 8px 16px; border-radius: 50px;
-    display: none;                 /* ← suru ma hide */
+    display: none;
     margin: 8px 0 14px;
-    min-width: 180px;
   }
-  .buttons { display: flex; justify-content: center; gap: 12px; }
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
   button {
     padding: 12px 20px; font-size: 15px;
     border: none; border-radius: 50px;
@@ -76,7 +85,6 @@
     font-size: 65px; z-index: 9999;
     pointer-events: none;
     animation: pop 1.2s ease forwards;
-    text-align: center;
   }
   @keyframes pop {
     0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
@@ -84,11 +92,29 @@
     70%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
     100% { transform: translate(-50%, -65%) scale(0.6); opacity: 0; }
   }
+  .confetti {
+    position: fixed;
+    width: 10px; height: 10px;
+    top: -10px;
+    z-index: 999;
+    animation: confettiFall 3s linear forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
 </style>
 </head>
 <body>
 
   <div class="hearts-bg" id="heartsBg"></div>
+  <div class="balloons-bg" id="balloonsBg"></div>
+
+  <audio id="sadMusic" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="romanticMusic" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  </audio>
 
   <div class="container" id="main">
     <img src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg" class="photo" alt="Her">
@@ -105,13 +131,8 @@
   </div>
 
   <div class="container hidden" id="love">
-    <h1>I Love You So Much 💕</h1>
-    <p>
-      Timro muskan nai mero happiness ho.<br>
-      Ma afno galti accept garchu.<br>
-      Please risai narakha na baby.<br><br>
-      <strong>Forever yours ❤️</strong>
-    </p>
+    <h1 id="loveTitle">I Love You So Much 💕</h1>
+    <p id="loveMessage"></p>
   </div>
 
 <script>
@@ -122,6 +143,11 @@
   const message = document.getElementById('message');
   const rejectText = document.getElementById('rejectText');
   const heartsBg = document.getElementById('heartsBg');
+  const balloonsBg = document.getElementById('balloonsBg');
+  const sadMusic = document.getElementById('sadMusic');
+  const romanticMusic = document.getElementById('romanticMusic');
+  const loveTitle = document.getElementById('loveTitle');
+  const loveMessage = document.getElementById('loveMessage');
 
   let rejects = 0;
 
@@ -138,75 +164,134 @@
     "Maile sabai galti accept garchu.<br>Please ek chance deu na 🥺"
   ];
 
-  const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿","🥺💔😢","💔😭💔","😿💔","😩💔😭"];
+  const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿"];
   const heartStyles = ["❤️","💖","💕","💗","💓","💘","💝","🖤","💔","✨"];
+  const balloonTexts = ["I ❤️ You", "Sorry 🥺", "Maaf gara", "Forgive me", "Love you"];
 
   setInterval(() => {
     const heart = document.createElement('div');
     heart.classList.add('heart');
-    heart.innerHTML = heartStyles[Math.floor(Math.random() * heartStyles.length)];
-    heart.style.left = Math.random() * 100 + 'vw';
-    heart.style.fontSize = (Math.random() * 12 + 14) + 'px';
-    heart.style.animationDuration = (Math.random() * 4 + 3) + 's';
+    heart.innerHTML = heartStyles[Math.floor(Math.random()*heartStyles.length)];
+    heart.style.left = Math.random()*100 + 'vw';
+    heart.style.fontSize = (Math.random()*12 + 14) + 'px';
+    heart.style.animationDuration = (Math.random()*4 + 3) + 's';
     heartsBg.appendChild(heart);
     setTimeout(() => heart.remove(), 7000);
   }, 400);
 
+  setInterval(() => {
+    const b = document.createElement('div');
+    b.classList.add('balloon');
+    b.innerHTML = balloonTexts[Math.floor(Math.random()*balloonTexts.length)];
+    b.style.left = Math.random()*100 + 'vw';
+    b.style.animationDuration = (Math.random()*5 + 4) + 's';
+    balloonsBg.appendChild(b);
+    setTimeout(() => b.remove(), 9000);
+  }, 1200);
+
+  function playMusic(type) {
+    sadMusic.pause();
+    romanticMusic.pause();
+
+    if (type === 'sad') {
+      sadMusic.currentTime = 0;
+      sadMusic.volume = 0.45;
+      sadMusic.play().catch(()=>{});
+    } else {
+      romanticMusic.currentTime = 0;
+      romanticMusic.volume = 0.5;
+      romanticMusic.play().catch(()=>{});
+    }
+  }
+
   function showReaction() {
     const el = document.createElement('div');
     el.className = 'reaction';
-    el.innerHTML = reactions[Math.floor(Math.random() * reactions.length)];
+    el.innerHTML = reactions[Math.floor(Math.random()*reactions.length)];
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1300);
   }
 
   function moveButton() {
-    const maxX = window.innerWidth - 170;
-    const maxY = window.innerHeight - 70;
-    noBtn.style.position = 'fixed';
-    noBtn.style.left = Math.max(10, Math.random() * maxX) + 'px';
-    noBtn.style.top = Math.max(10, Math.random() * maxY) + 'px';
-    noBtn.style.zIndex = '9999';
+    noBtn.style.transition = '0.1s';
+    noBtn.style.transform = 'translateX(-8px)';
+    setTimeout(() => noBtn.style.transform = 'translateX(8px)', 80);
+    setTimeout(() => noBtn.style.transform = 'translateX(-5px)', 160);
+    setTimeout(() => noBtn.style.transform = 'translateX(0)', 240);
+
+    setTimeout(() => {
+      const maxX = window.innerWidth - 170;
+      const maxY = window.innerHeight - 70;
+      noBtn.style.position = 'fixed';
+      noBtn.style.left = Math.max(10, Math.random()*maxX) + 'px';
+      noBtn.style.top = Math.max(10, Math.random()*maxY) + 'px';
+      noBtn.style.zIndex = '9999';
+    }, 300);
   }
 
   function handleReject() {
     rejects = rejects + 1;
-
-    // Pehla click pachi matra dekhaune
     rejectText.style.display = 'inline-block';
     rejectText.innerHTML = "You rejected " + rejects + (rejects > 1 ? " times" : " time") + " 😔";
-
     message.innerHTML = messages[Math.min(rejects, messages.length - 1)];
     showReaction();
     moveButton();
+    playMusic('sad');
   }
 
   noBtn.addEventListener('click', function(e) {
     e.preventDefault();
     handleReject();
   });
-
   noBtn.addEventListener('touchstart', function(e) {
     e.preventDefault();
     handleReject();
   }, {passive: false});
-
   noBtn.addEventListener('mouseover', handleReject);
+
+  function createConfetti() {
+    const colors = ['#e91e63','#ff9a9e','#fbc2eb','#ffeb3b','#4caf50','#2196f3'];
+    for (let i = 0; i < 120; i++) {
+      const conf = document.createElement('div');
+      conf.className = 'confetti';
+      conf.style.left = Math.random()*100 + 'vw';
+      conf.style.background = colors[Math.floor(Math.random()*colors.length)];
+      conf.style.animationDuration = (Math.random()*2 + 2) + 's';
+      conf.style.animationDelay = Math.random()*0.5 + 's';
+      document.body.appendChild(conf);
+      setTimeout(() => conf.remove(), 4000);
+    }
+  }
 
   yesBtn.addEventListener('click', () => {
     main.classList.add('hidden');
     love.classList.remove('hidden');
-    for (let i = 0; i < 50; i++) {
+    playMusic('romantic');
+
+    if (rejects <= 2) {
+      loveTitle.innerHTML = "I Love You So Much 💕";
+      loveMessage.innerHTML = `Timro muskan nai mero happiness ho.<br>Ma afno galti accept garchu.<br>Please risai narakha na baby.<br><br><strong>Forever yours ❤️</strong>`;
+    } else if (rejects <= 6) {
+      loveTitle.innerHTML = "You made me wait... 🥺";
+      loveMessage.innerHTML = `Jati choti reject gare pani maile wait gare.<br>Thank you for finally forgiving me.<br>I love you more than anything 💕<br><br><strong>Forever yours ❤️</strong>`;
+    } else {
+      loveTitle.innerHTML = "You really tested me 😭";
+      loveMessage.innerHTML = rejects + ` times reject gareu... tara maile give up garina.<br>That's how much I love you.<br>Please don't make me wait again 🥺❤️<br><br><strong>Forever & Always yours</strong>`;
+    }
+
+    createConfetti();
+
+    for (let i = 0; i < 60; i++) {
       setTimeout(() => {
         const heart = document.createElement('div');
         heart.classList.add('heart');
-        heart.innerHTML = heartStyles[Math.floor(Math.random() * heartStyles.length)];
-        heart.style.left = Math.random() * 100 + 'vw';
-        heart.style.fontSize = (Math.random() * 18 + 16) + 'px';
-        heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        heart.innerHTML = heartStyles[Math.floor(Math.random()*heartStyles.length)];
+        heart.style.left = Math.random()*100 + 'vw';
+        heart.style.fontSize = (Math.random()*20 + 16) + 'px';
+        heart.style.animationDuration = (Math.random()*3 + 2) + 's';
         heartsBg.appendChild(heart);
         setTimeout(() => heart.remove(), 5000);
-      }, i * 70);
+      }, i * 60);
     }
   });
 </script>
