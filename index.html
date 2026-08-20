@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For My Love ❤️</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+  .container {
+    text-align: center;
+    background: rgba(255,255,255,0.9);
+    padding: 40px 30px;
+    border-radius: 25px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    max-width: 380px;
+    width: 90%;
+    z-index: 10;
+  }
+  h1 {
+    color: #e91e63;
+    font-size: 28px;
+    margin-bottom: 15px;
+  }
+  p {
+    color: #555;
+    font-size: 18px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+  }
+  button {
+    padding: 14px 32px;
+    font-size: 18px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  #yes {
+    background: #e91e63;
+    color: white;
+  }
+  #yes:hover {
+    background: #c2185b;
+    transform: scale(1.08);
+  }
+  #no {
+    background: #f5f5f5;
+    color: #333;
+    position: absolute;
+  }
+  .hearts {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .heart {
+    position: absolute;
+    font-size: 24px;
+    animation: fall 4s linear infinite;
+    opacity: 0.8;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+  .love-message {
+    display: none;
+    text-align: center;
+  }
+  .love-message h1 {
+    font-size: 32px;
+    color: #e91e63;
+  }
+  .love-message p {
+    font-size: 20px;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+  <div class="hearts" id="hearts"></div>
+
+  <div class="container" id="main">
+    <h1>Baby... 🥺</h1>
+    <p>Maile galti gare, maaf gara na.<br>Timi risako dekhera mann dukhiraxa.</p>
+    <div class="buttons">
+      <button id="yes">Maaf garchu ❤️</button>
+      <button id="no">Haina</button>
+    </div>
+  </div>
+
+  <div class="container love-message" id="love">
+    <h1>I Love You So Much 💕</h1>
+    <p>
+      Timro muskan nai mero happiness ho.<br>
+      Ma afno galti accept garchu.<br>
+      Please risai narakha na baby.<br><br>
+      <strong>Forever yours ❤️</strong>
+    </p>
+  </div>
+
+<script>
+  const noBtn = document.getElementById('no');
+  const yesBtn = document.getElementById('yes');
+  const main = document.getElementById('main');
+  const love = document.getElementById('love');
+  const hearts = document.getElementById('hearts');
+
+  // No button bhagna
+  noBtn.addEventListener('mouseover', () => {
+    const x = Math.random() * (window.innerWidth - 120);
+    const y = Math.random() * (window.innerHeight - 60);
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+    noBtn.style.position = 'fixed';
+  });
+
+  // Mobile touch support
+  noBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const x = Math.random() * (window.innerWidth - 120);
+    const y = Math.random() * (window.innerHeight - 60);
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+    noBtn.style.position = 'fixed';
+  });
+
+  yesBtn.addEventListener('click', () => {
+    main.style.display = 'none';
+    love.style.display = 'block';
+    createHearts();
+  });
+
+  function createHearts() {
+    for (let i = 0; i < 40; i++) {
+      setTimeout(() => {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.innerHTML = ['❤️','💖','💕','💗','💓'][Math.floor(Math.random()*5)];
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        hearts.appendChild(heart);
+        setTimeout(() => heart.remove(), 5000);
+      }, i * 150);
+    }
+  }
+
+  // Extra: page reload attempt prevent (optional stubbornness)
+  window.onbeforeunload = function() {
+    return "Please maaf gara na 🥺";
+  };
+</script>
+</body>
+</html>
