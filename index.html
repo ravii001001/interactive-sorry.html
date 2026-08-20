@@ -14,131 +14,96 @@
     background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
     font-family: 'Segoe UI', sans-serif;
     padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .hearts-bg {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; overflow: hidden;
+  }
+  .heart {
+    position: absolute; font-size: 18px;
+    animation: fall linear infinite; opacity: 0.7;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.8; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
   }
   .container {
     text-align: center;
-    background: rgba(255,255,255,0.96);
+    background: rgba(255,255,255,0.97);
     padding: 28px 20px;
-    border-radius: 24px;
-    box-shadow: 0 12px 35px rgba(0,0,0,0.12);
-    max-width: 400px;
-    width: 100%;
-  }
-  .photos {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 16px;
+    border-radius: 28px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.13);
+    max-width: 400px; width: 100%;
+    position: relative; z-index: 10;
   }
   .photo {
-    width: 105px;
-    height: 105px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #e91e63;
-    box-shadow: 0 5px 15px rgba(233,30,99,0.25);
+    width: 125px; height: 125px;
+    border-radius: 50%; object-fit: cover;
+    border: 4px solid #e91e63;
+    box-shadow: 0 8px 20px rgba(233,30,99,0.3);
+    margin-bottom: 14px;
   }
-  h1 {
+  h1 { color: #e91e63; font-size: 23px; margin-bottom: 10px; }
+  #message {
+    color: #444; font-size: 15px;
+    margin-bottom: 12px; line-height: 1.5; min-height: 45px;
+  }
+  #rejectText {
+    background: #ffe6ee;
     color: #e91e63;
-    font-size: 23px;
-    margin-bottom: 10px;
+    font-size: 16px; font-weight: 700;
+    padding: 8px 16px; border-radius: 50px;
+    display: none;                 /* ← suru ma hide */
+    margin: 8px 0 14px;
+    min-width: 180px;
   }
-  p {
-    color: #444;
-    font-size: 15.5px;
-    margin-bottom: 22px;
-    line-height: 1.5;
-  }
-  .buttons {
-    display: flex;
-    justify-content: center;
-    gap: 14px;
-  }
+  .buttons { display: flex; justify-content: center; gap: 12px; }
   button {
-    padding: 12px 24px;
-    font-size: 15.5px;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 600;
-    color: white;
-    background: #e91e63;          /* duitai same color */
-    transition: 0.25s;
+    padding: 12px 20px; font-size: 15px;
+    border: none; border-radius: 50px;
+    cursor: pointer; font-weight: 600;
+    color: white; background: #e91e63;
   }
-  button:hover {
-    background: #c2185b;
-    transform: scale(1.05);
-  }
+  button:hover { background: #c2185b; }
+  #no { position: relative; }
   .hidden { display: none !important; }
+  .reaction {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 65px; z-index: 9999;
+    pointer-events: none;
+    animation: pop 1.2s ease forwards;
+    text-align: center;
+  }
+  @keyframes pop {
+    0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    30%  { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+    70%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -65%) scale(0.6); opacity: 0; }
+  }
 </style>
 </head>
 <body>
 
-  <!-- Page 0 - Main -->
-  <div class="container" id="page0">
-    <div class="photos">
-      <img src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg" class="photo" alt="Me">
-      <img src="USKO_PHOTO_LINK" class="photo" alt="Her">
-    </div>
+  <div class="hearts-bg" id="heartsBg"></div>
+
+  <div class="container" id="main">
+    <img src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg" class="photo" alt="Her">
+
     <h1>Baby... 🥺</h1>
-    <p>Maile galti gare, maaf gara na.<br>Timi risako dekhera mann dukhiraxa.</p>
+    <p id="message">Maile galti gare, maaf gara na.<br>Timi risako dekhera mann dukhiraxa.</p>
+
+    <div id="rejectText"></div>
+
     <div class="buttons">
-      <button onclick="showLove()">Maaf garchu ❤️</button>
-      <button onclick="showPage(1)">Haina</button>
+      <button id="yes">Maaf garchu ❤️</button>
+      <button id="no">Accept nahi krungi</button>
     </div>
   </div>
 
-  <!-- Page 1 -->
-  <div class="container hidden" id="page1">
-    <h1>Please maaf gara na 😢</h1>
-    <p>Maile thaha paye ki maile timilai dukha diye.<br>Maaf gara na baby... ma feri galti gardina.</p>
-    <div class="buttons">
-      <button onclick="showLove()">Maaf garchu ❤️</button>
-      <button onclick="showPage(2)">Haina</button>
-    </div>
-  </div>
-
-  <!-- Page 2 -->
-  <div class="container hidden" id="page2">
-    <h1>Sachi ma sorry 🥺</h1>
-    <p>Timro mann dukhauna maile chahena.<br>Please ek choti maaf gara na.</p>
-    <div class="buttons">
-      <button onclick="showLove()">Maaf garchu ❤️</button>
-      <button onclick="showPage(3)">Haina</button>
-    </div>
-  </div>
-
-  <!-- Page 3 -->
-  <div class="container hidden" id="page3">
-    <h1>Maile galti gare 💔</h1>
-    <p>Timi bina ma incomplete chu.<br>Please risai narakha na, maaf gara.</p>
-    <div class="buttons">
-      <button onclick="showLove()">Maaf garchu ❤️</button>
-      <button onclick="showPage(4)">Haina</button>
-    </div>
-  </div>
-
-  <!-- Page 4 -->
-  <div class="container hidden" id="page4">
-    <h1>Last time... please 😭</h1>
-    <p>Maile afno galti bujhe.<br>Timilai dukha diyeko maile maaf chahanchu.</p>
-    <div class="buttons">
-      <button onclick="showLove()">Maaf garchu ❤️</button>
-      <button onclick="showPage(5)">Haina</button>
-    </div>
-  </div>
-
-  <!-- Page 5 - Final -->
-  <div class="container hidden" id="page5">
-    <h1>Ma afno galti accept garchu 🥺</h1>
-    <p>Jati choti Haina bhanda pani<br>maile sorry nai bhanirahanchu.<br><br>Please maaf gara na baby...</p>
-    <div class="buttons">
-      <button onclick="showLove()">Maaf garchu ❤️</button>
-      <button onclick="showPage(5)">Haina</button>
-    </div>
-  </div>
-
-  <!-- Love Message -->
   <div class="container hidden" id="love">
     <h1>I Love You So Much 💕</h1>
     <p>
@@ -150,15 +115,100 @@
   </div>
 
 <script>
-  function showPage(num) {
-    document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-    document.getElementById('page' + num).classList.remove('hidden');
+  const noBtn = document.getElementById('no');
+  const yesBtn = document.getElementById('yes');
+  const main = document.getElementById('main');
+  const love = document.getElementById('love');
+  const message = document.getElementById('message');
+  const rejectText = document.getElementById('rejectText');
+  const heartsBg = document.getElementById('heartsBg');
+
+  let rejects = 0;
+
+  const messages = [
+    "Maile galti gare, maaf gara na.<br>Timi risako dekhera mann dukhiraxa.",
+    "Please forgive me baby 🥺<br>Maile timilai dukha diyeko maile maaf chahanchu.",
+    "I'm really sorry... 💔<br>Timro mann dukhauna maile chahena.",
+    "Maile galti gare, sachi ma 😭<br>Please ek choti maaf gara na.",
+    "Timi bina ma incomplete chu 😢<br>Please risai narakha na.",
+    "Jati choti reject garda pani<br>maile sorry nai bhanirahanchu 🥺",
+    "Baby please... maaf gara na 💔<br>Ma feri galti gardina.",
+    "Timro muskan nai mero happiness ho.<br>Please forgive me 😢",
+    "Last time... please maaf gara 😭❤️",
+    "Maile sabai galti accept garchu.<br>Please ek chance deu na 🥺"
+  ];
+
+  const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿","🥺💔😢","💔😭💔","😿💔","😩💔😭"];
+  const heartStyles = ["❤️","💖","💕","💗","💓","💘","💝","🖤","💔","✨"];
+
+  setInterval(() => {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.innerHTML = heartStyles[Math.floor(Math.random() * heartStyles.length)];
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.fontSize = (Math.random() * 12 + 14) + 'px';
+    heart.style.animationDuration = (Math.random() * 4 + 3) + 's';
+    heartsBg.appendChild(heart);
+    setTimeout(() => heart.remove(), 7000);
+  }, 400);
+
+  function showReaction() {
+    const el = document.createElement('div');
+    el.className = 'reaction';
+    el.innerHTML = reactions[Math.floor(Math.random() * reactions.length)];
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
   }
 
-  function showLove() {
-    document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-    document.getElementById('love').classList.remove('hidden');
+  function moveButton() {
+    const maxX = window.innerWidth - 170;
+    const maxY = window.innerHeight - 70;
+    noBtn.style.position = 'fixed';
+    noBtn.style.left = Math.max(10, Math.random() * maxX) + 'px';
+    noBtn.style.top = Math.max(10, Math.random() * maxY) + 'px';
+    noBtn.style.zIndex = '9999';
   }
+
+  function handleReject() {
+    rejects = rejects + 1;
+
+    // Pehla click pachi matra dekhaune
+    rejectText.style.display = 'inline-block';
+    rejectText.innerHTML = "You rejected " + rejects + (rejects > 1 ? " times" : " time") + " 😔";
+
+    message.innerHTML = messages[Math.min(rejects, messages.length - 1)];
+    showReaction();
+    moveButton();
+  }
+
+  noBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    handleReject();
+  });
+
+  noBtn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    handleReject();
+  }, {passive: false});
+
+  noBtn.addEventListener('mouseover', handleReject);
+
+  yesBtn.addEventListener('click', () => {
+    main.classList.add('hidden');
+    love.classList.remove('hidden');
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.innerHTML = heartStyles[Math.floor(Math.random() * heartStyles.length)];
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.fontSize = (Math.random() * 18 + 16) + 'px';
+        heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        heartsBg.appendChild(heart);
+        setTimeout(() => heart.remove(), 5000);
+      }, i * 70);
+    }
+  });
 </script>
 </body>
 </html>
