@@ -16,7 +16,7 @@
     padding: 20px;
     overflow-x: hidden;
     position: relative;
-    transition: background 0.8s ease;
+    transition: background 1s ease;
   }
   body.level-2 { background: linear-gradient(135deg, #ff8a80, #f48fb1, #e1bee7); }
   body.level-3 { background: linear-gradient(135deg, #e57373, #f06292, #ba68c8); }
@@ -33,12 +33,12 @@
     100% { transform: scale(1); }
   }
 
-  .hearts-bg, .balloons-bg {
+  .hearts-bg, .balloons-bg, .quotes-bg {
     position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none; z-index: 1; overflow: hidden;
   }
-  .heart, .balloon, .broken-heart {
+  .heart, .balloon, .broken-heart, .quote {
     position: absolute;
     animation: fall linear infinite;
     opacity: 0.8;
@@ -51,6 +51,14 @@
     border-radius: 20px;
   }
   .broken-heart { font-size: 22px; opacity: 0.9; }
+  .quote {
+    font-size: 13px;
+    color: #ad1457;
+    background: rgba(255,255,255,0.75);
+    padding: 6px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
   @keyframes fall {
     0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.85; }
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
@@ -99,7 +107,7 @@
     font-style: italic;
     font-size: 14px;
   }
-  #rejectText, .guilt-counter {
+  #rejectText, .guilt-counter, .timer-counter {
     background: #ffe6ee;
     color: #e91e63;
     font-size: 14px; font-weight: 700;
@@ -108,6 +116,7 @@
     display: inline-block;
   }
   .guilt-counter { background: #fce4ec; }
+  .timer-counter { background: #f3e5f5; }
 
   .buttons {
     display: flex;
@@ -201,8 +210,37 @@
     to { transform: translate(-50%, -50%) rotate(8deg) scale(0); opacity: 0; }
   }
 
-  /* Love Letter */
-  .love-letter {
+  /* Secret Button */
+  .secret-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 100;
+    opacity: 0.5;
+    transition: 0.3s;
+    user-select: none;
+  }
+  .secret-btn:hover { opacity: 1; transform: scale(1.2); }
+
+  /* Write your own sorry */
+  #customSorry {
+    display: none;
+    margin: 12px 0;
+  }
+  #customSorry textarea {
+    width: 100%;
+    height: 70px;
+    border: 2px solid #e91e63;
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 14px;
+    resize: none;
+  }
+
+  /* Promise Card & Love Letter */
+  .love-letter, .promise-card {
     background: #fffdf7;
     border: 1px solid #f0e6d0;
     padding: 20px;
@@ -212,9 +250,13 @@
     font-size: 14.5px;
     line-height: 1.7;
     color: #444;
-    max-height: 320px;
+    max-height: 340px;
     overflow-y: auto;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
+  }
+  .promise-card {
+    text-align: center;
+    border: 2px dashed #e91e63;
   }
 </style>
 </head>
@@ -222,6 +264,9 @@
 
   <div class="hearts-bg" id="heartsBg"></div>
   <div class="balloons-bg" id="balloonsBg"></div>
+  <div class="quotes-bg" id="quotesBg"></div>
+
+  <div class="secret-btn" id="secretBtn">💖</div>
 
   <audio id="sadMusic" loop>
     <source src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/voicee.mp3" type="audio/mpeg">
@@ -240,7 +285,12 @@
 
     <div id="rejectText" style="display:none;"></div>
     <div class="guilt-counter" id="guiltCounter" style="display:none;"></div>
+    <div class="timer-counter" id="timerCounter" style="display:none;"></div>
     <div class="last-warning-text" id="lastWarning">⚠️ This is really hurting me...</div>
+
+    <div id="customSorry">
+      <textarea id="customText" placeholder="Write your own message here..."></textarea>
+    </div>
 
     <div class="buttons">
       <button id="yes">Sorry accepted ❤️</button>
@@ -251,6 +301,7 @@
   <div class="container hidden" id="love">
     <h1 id="loveTitle">I Love You So Much 💕</h1>
     <div id="loveMessage" class="love-letter"></div>
+    <div id="promiseCard" class="promise-card" style="margin-top:15px; display:none;"></div>
   </div>
 
 <script>
@@ -261,17 +312,26 @@
   const message = document.getElementById('message');
   const rejectText = document.getElementById('rejectText');
   const guiltCounter = document.getElementById('guiltCounter');
+  const timerCounter = document.getElementById('timerCounter');
   const heartsBg = document.getElementById('heartsBg');
   const balloonsBg = document.getElementById('balloonsBg');
+  const quotesBg = document.getElementById('quotesBg');
   const sadMusic = document.getElementById('sadMusic');
   const romanticMusic = document.getElementById('romanticMusic');
   const loveTitle = document.getElementById('loveTitle');
   const loveMessage = document.getElementById('loveMessage');
+  const promiseCard = document.getElementById('promiseCard');
   const lastWarning = document.getElementById('lastWarning');
   const mainTitle = document.getElementById('mainTitle');
+  const customSorry = document.getElementById('customSorry');
+  const customText = document.getElementById('customText');
+  const secretBtn = document.getElementById('secretBtn');
 
   let rejects = 0;
   let isTyping = false;
+  let startTime = null;
+  let timerInterval = null;
+  let secretClicks = 0;
 
   const messages = [
     "Maile galti gare, maaf gara na.<br>Timi risako dekhera mann dukhiraxa.",
@@ -288,24 +348,20 @@
     "Please... ma afno galti bujhechu 💔"
   ];
 
-  // ===== CLEAN MEMORIES (fixed) =====
   const memories = [
-    {
-      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg",
-      text: "Remember this smile? 🥺"
-    },
-    {
-      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg",
-      text: "Us against the world..."
-    },
-    {
-      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg",
-      text: "That day was special ❤️"
-    },
-    {
-      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg",
-      text: "I miss this version of us"
-    }
+    { img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg", text: "Remember this smile? 🥺" },
+    { img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg", text: "Us against the world..." },
+    { img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg", text: "That day was special ❤️" },
+    { img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg", text: "I miss this version of us" }
+  ];
+
+  const loveQuotes = [
+    "You are my today and all of my tomorrows",
+    "In your smile I see something more beautiful than stars",
+    "I love you more than words can express",
+    "Every love story is beautiful, but ours is my favorite",
+    "You are my home",
+    "Forever isn’t long enough with you"
   ];
 
   const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿","🥺💔"];
@@ -334,6 +390,17 @@
     balloonsBg.appendChild(b);
     setTimeout(() => b.remove(), 9000);
   }, 1300);
+
+  // Floating Love Quotes
+  setInterval(() => {
+    const q = document.createElement('div');
+    q.classList.add('quote');
+    q.innerHTML = loveQuotes[Math.floor(Math.random()*loveQuotes.length)];
+    q.style.left = Math.random()*80 + 10 + 'vw';
+    q.style.animationDuration = (Math.random()*6 + 5) + 's';
+    quotesBg.appendChild(q);
+    setTimeout(() => q.remove(), 11000);
+  }, 2800);
 
   function playMusic(type) {
     sadMusic.pause();
@@ -398,10 +465,12 @@
   function updateIntensity() {
     document.body.classList.remove('level-2','level-3','level-4','last-warning');
     lastWarning.style.display = 'none';
+    customSorry.style.display = 'none';
 
     if (rejects >= 12) {
       document.body.classList.add('last-warning');
       lastWarning.style.display = 'block';
+      customSorry.style.display = 'block';
       mainTitle.innerHTML = "Please... 😭";
     } else if (rejects >= 8) {
       document.body.classList.add('level-4');
@@ -414,19 +483,28 @@
     }
   }
 
-  // ===== FIXED POLAROID =====
+  function startTimer() {
+  if (!startTime) {
+    startTime = Date.now();
+    timerCounter.style.display = 'inline-block';
+    timerInterval = setInterval(() => {
+      const seconds = Math.floor((Date.now() - startTime) / 1000);
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerCounter.innerHTML = "⏱️ Rejecting for " + (mins > 0 ? mins + "m " : "") + secs + "s";
+    }, 1000);
+  }
+}
+
   function showPolaroid() {
     const mem = memories[Math.floor(Math.random() * memories.length)];
     const div = document.createElement('div');
     div.className = 'polaroid';
     div.innerHTML = `
-      <img src="${mem.img}" 
-           alt="memory" 
-           onerror="this.src='https://via.placeholder.com/180x180/ff9a9e/ffffff?text=Memory+❤️'">
+      <img src="${mem.img}" alt="memory" onerror="this.src='https://via.placeholder.com/180x180/ff9a9e/ffffff?text=Memory+❤️'">
       <p>${mem.text}</p>
     `;
     document.body.appendChild(div);
-
     setTimeout(() => {
       div.classList.add('hide');
       setTimeout(() => div.remove(), 500);
@@ -444,9 +522,19 @@
     }
   }
 
+  // Secret Button
+  secretBtn.addEventListener('click', () => {
+    secretClicks++;
+    if (secretClicks >= 5) {
+      secretClicks = 0;
+      alert("Secret unlocked 💖\n\nI love you more than you know...\nEven when you reject me, I still choose you.");
+    }
+  });
+
   function handleReject() {
     if (isTyping) return;
     rejects++;
+    startTimer();
 
     document.body.classList.add('heartbeat-pulse');
     setTimeout(() => document.body.classList.remove('heartbeat-pulse'), 700);
@@ -491,12 +579,12 @@
 
   function createConfetti() {
     const colors = ['#e91e63','#ff9a9e','#fbc2eb','#ffeb3b','#4caf50','#2196f3','#ff4081'];
-    for (let i = 0; i < 140; i++) {
+    for (let i = 0; i < 160; i++) {
       const conf = document.createElement('div');
       conf.className = 'confetti';
       conf.style.left = Math.random()*100 + 'vw';
       conf.style.background = colors[Math.floor(Math.random()*colors.length)];
-      conf.style.width = (Math.random()*8 + 6) + 'px';
+      conf.style.width = (Math.random()*10 + 6) + 'px';
       conf.style.height = conf.style.width;
       conf.style.animationDuration = (Math.random()*2.5 + 2) + 's';
       conf.style.animationDelay = Math.random()*0.6 + 's';
@@ -525,11 +613,14 @@
   }
 
   yesBtn.addEventListener('click', () => {
+    if (timerInterval) clearInterval(timerInterval);
+
     main.classList.add('hidden');
     love.classList.remove('hidden');
     playMusic('romantic');
 
     let letter = "";
+    const userMessage = customText.value.trim();
 
     if (rejects <= 2) {
       loveTitle.innerHTML = "I Love You So Much 💕";
@@ -568,20 +659,38 @@ I don’t want a life without you.<br><br>
 <strong>Now and always, I’m yours 💕</strong>`;
     }
 
+    if (userMessage) {
+      letter += `<br><br><em>Your message: "${userMessage}"</em>`;
+    }
+
     typeLoveLetter(letter, loveMessage);
+
+    // Promise Card
+    setTimeout(() => {
+      promiseCard.style.display = 'block';
+      promiseCard.innerHTML = `
+        <h3 style="color:#e91e63; margin-bottom:10px;">💌 My Promise to You</h3>
+        I promise to never hurt you again.<br>
+        I promise to choose you every day.<br>
+        I promise to love you better than yesterday.<br><br>
+        <strong>— Forever Yours</strong>
+      `;
+    }, 2500);
+
     createConfetti();
 
-    for (let i = 0; i < 70; i++) {
+    // Big heart explosion
+    for (let i = 0; i < 90; i++) {
       setTimeout(() => {
         const heart = document.createElement('div');
         heart.classList.add('heart');
         heart.innerHTML = heartStyles[Math.floor(Math.random()*heartStyles.length)];
         heart.style.left = Math.random()*100 + 'vw';
-        heart.style.fontSize = (Math.random()*22 + 16) + 'px';
+        heart.style.fontSize = (Math.random()*26 + 16) + 'px';
         heart.style.animationDuration = (Math.random()*3 + 2) + 's';
         heartsBg.appendChild(heart);
         setTimeout(() => heart.remove(), 5000);
-      }, i * 50);
+      }, i * 40);
     }
   });
 </script>
