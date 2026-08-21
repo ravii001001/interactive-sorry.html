@@ -38,7 +38,7 @@
     width: 100%; height: 100%;
     pointer-events: none; z-index: 1; overflow: hidden;
   }
-  .heart, .balloon, .broken-heart, .quote {
+  .heart, .balloon, .broken-heart, .quote, .particle {
     position: absolute;
     animation: fall linear infinite;
     opacity: 0.8;
@@ -58,6 +58,15 @@
     padding: 6px 12px;
     border-radius: 20px;
     white-space: nowrap;
+  }
+  .particle {
+    font-size: 14px;
+    pointer-events: none;
+    animation: particleFade 1s forwards;
+  }
+  @keyframes particleFade {
+    0% { transform: scale(1); opacity: 0.9; }
+    100% { transform: scale(0.3) translateY(-30px); opacity: 0; }
   }
   @keyframes fall {
     0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.85; }
@@ -91,6 +100,12 @@
     border: 4px solid #e91e63;
     box-shadow: 0 8px 20px rgba(233,30,99,0.3);
     animation: heartbeat 1.5s ease-in-out infinite;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  }
+  .photo:hover {
+    transform: scale(1.25);
+    z-index: 20;
   }
   @keyframes heartbeat {
     0%, 100% { transform: scale(1); }
@@ -136,6 +151,10 @@
   button:hover { background: #c2185b; }
   #yes { box-shadow: 0 0 15px rgba(233,30,99,0.4); }
   #yes.growing { animation: pulse 1.4s infinite; }
+  #oneMore {
+    background: #7b1fa2;
+    display: none;
+  }
   @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.07); }
@@ -239,15 +258,15 @@
     resize: none;
   }
 
-  /* Promise Card & Love Letter */
+  /* Love Letter + Promise */
   .love-letter, .promise-card {
     background: #fffdf7;
     border: 1px solid #f0e6d0;
     padding: 20px;
     border-radius: 12px;
     text-align: left;
-    font-family: Georgia, serif;
-    font-size: 14.5px;
+    font-family: 'Segoe Script', 'Comic Sans MS', cursive;
+    font-size: 15px;
     line-height: 1.7;
     color: #444;
     max-height: 340px;
@@ -257,6 +276,27 @@
   .promise-card {
     text-align: center;
     border: 2px dashed #e91e63;
+    font-family: Georgia, serif;
+  }
+
+  /* Compliment */
+  .compliment {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    background: rgba(255,255,255,0.95);
+    color: #ad1457;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    animation: complimentIn 0.5s forwards;
+  }
+  @keyframes complimentIn {
+    to { transform: translateX(-50%) scale(1); }
   }
 </style>
 </head>
@@ -294,6 +334,7 @@
 
     <div class="buttons">
       <button id="yes">Sorry accepted ❤️</button>
+      <button id="oneMore">One More Chance 💜</button>
       <button id="no">Sorry not accepted</button>
     </div>
   </div>
@@ -307,6 +348,7 @@
 <script>
   const noBtn = document.getElementById('no');
   const yesBtn = document.getElementById('yes');
+  const oneMoreBtn = document.getElementById('oneMore');
   const main = document.getElementById('main');
   const love = document.getElementById('love');
   const message = document.getElementById('message');
@@ -332,6 +374,7 @@
   let startTime = null;
   let timerInterval = null;
   let secretClicks = 0;
+  let oneMoreUsed = false;
 
   const messages = [
     "Maile galti gare, maaf gara na.<br>Timi risako dekhera mann dukhiraxa.",
@@ -362,6 +405,14 @@
     "Every love story is beautiful, but ours is my favorite",
     "You are my home",
     "Forever isn’t long enough with you"
+  ];
+
+  const compliments = [
+    "Timro aankha dherai beautiful cha ✨",
+    "I miss your laugh so much 🥺",
+    "You make everything better",
+    "Timro smile nai mero favorite ho",
+    "I still choose you every day"
   ];
 
   const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿","🥺💔"];
@@ -402,16 +453,42 @@
     setTimeout(() => q.remove(), 11000);
   }, 2800);
 
+  // Soft Particle Trail
+  document.addEventListener('mousemove', (e) => {
+    if (Math.random() > 0.7) return;
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.innerHTML = heartStyles[Math.floor(Math.random()*3)];
+    p.style.left = e.clientX + 'px';
+    p.style.top = e.clientY + 'px';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  });
+
+  // Random Compliment
+  setInterval(() => {
+    if (Math.random() > 0.4) return;
+    const c = document.createElement('div');
+    c.className = 'compliment';
+    c.innerHTML = compliments[Math.floor(Math.random()*compliments.length)];
+    document.body.appendChild(c);
+    setTimeout(() => {
+      c.style.opacity = '0';
+      c.style.transition = '0.5s';
+      setTimeout(() => c.remove(), 500);
+    }, 2500);
+  }, 8000);
+
   function playMusic(type) {
     sadMusic.pause();
     romanticMusic.pause();
     if (type === 'sad') {
       sadMusic.currentTime = 0;
-      sadMusic.volume = 0.4;
+      sadMusic.volume = Math.max(0.15, 0.45 - (rejects * 0.03));
       sadMusic.play().catch(()=>{});
     } else {
       romanticMusic.currentTime = 0;
-      romanticMusic.volume = 0.45;
+      romanticMusic.volume = 0.5;
       romanticMusic.play().catch(()=>{});
     }
   }
@@ -466,11 +543,13 @@
     document.body.classList.remove('level-2','level-3','level-4','last-warning');
     lastWarning.style.display = 'none';
     customSorry.style.display = 'none';
+    oneMoreBtn.style.display = 'none';
 
     if (rejects >= 12) {
       document.body.classList.add('last-warning');
       lastWarning.style.display = 'block';
       customSorry.style.display = 'block';
+      if (!oneMoreUsed) oneMoreBtn.style.display = 'inline-block';
       mainTitle.innerHTML = "Please... 😭";
     } else if (rejects >= 8) {
       document.body.classList.add('level-4');
@@ -484,17 +563,17 @@
   }
 
   function startTimer() {
-  if (!startTime) {
-    startTime = Date.now();
-    timerCounter.style.display = 'inline-block';
-    timerInterval = setInterval(() => {
-      const seconds = Math.floor((Date.now() - startTime) / 1000);
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      timerCounter.innerHTML = "⏱️ Rejecting for " + (mins > 0 ? mins + "m " : "") + secs + "s";
-    }, 1000);
+    if (!startTime) {
+      startTime = Date.now();
+      timerCounter.style.display = 'inline-block';
+      timerInterval = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        timerCounter.innerHTML = "⏱️ Rejecting for " + (mins > 0 ? mins + "m " : "") + secs + "s";
+      }, 1000);
+    }
   }
-}
 
   function showPolaroid() {
     const mem = memories[Math.floor(Math.random() * memories.length)];
@@ -528,6 +607,24 @@
     if (secretClicks >= 5) {
       secretClicks = 0;
       alert("Secret unlocked 💖\n\nI love you more than you know...\nEven when you reject me, I still choose you.");
+    }
+  });
+
+  // One More Chance
+  oneMoreBtn.addEventListener('click', () => {
+    oneMoreUsed = true;
+    oneMoreBtn.style.display = 'none';
+    rejects = Math.max(0, rejects - 4);
+    updateIntensity();
+    updateYesSize();
+    message.innerHTML = "Thank you for giving me one more chance 🥺❤️";
+    showReaction("💜");
+  });
+
+  // Exit Intent
+  document.addEventListener('mouseleave', (e) => {
+    if (e.clientY < 10 && rejects > 3) {
+      showReaction("Please don't leave 💔");
     }
   });
 
@@ -578,7 +675,11 @@
   noBtn.addEventListener('mouseover', handleReject);
 
   function createConfetti() {
-    const colors = ['#e91e63','#ff9a9e','#fbc2eb','#ffeb3b','#4caf50','#2196f3','#ff4081'];
+    let colors;
+    if (rejects >= 12) colors = ['#4a148c','#311b92','#7b1fa2','#e91e63'];
+    else if (rejects >= 8) colors = ['#c62828','#ad1457','#e91e63','#ff5252'];
+    else colors = ['#e91e63','#ff9a9e','#fbc2eb','#ffeb3b','#4caf50','#2196f3'];
+
     for (let i = 0; i < 160; i++) {
       const conf = document.createElement('div');
       conf.className = 'confetti';
@@ -665,7 +766,6 @@ I don’t want a life without you.<br><br>
 
     typeLoveLetter(letter, loveMessage);
 
-    // Promise Card
     setTimeout(() => {
       promiseCard.style.display = 'block';
       promiseCard.innerHTML = `
@@ -679,7 +779,6 @@ I don’t want a life without you.<br><br>
 
     createConfetti();
 
-    // Big heart explosion
     for (let i = 0; i < 90; i++) {
       setTimeout(() => {
         const heart = document.createElement('div');
