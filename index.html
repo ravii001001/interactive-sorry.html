@@ -183,6 +183,7 @@
     height: 180px;
     object-fit: cover;
     display: block;
+    background: #f5f5f5;
   }
   .polaroid p {
     margin-top: 10px;
@@ -242,7 +243,7 @@
     <div class="last-warning-text" id="lastWarning">⚠️ This is really hurting me...</div>
 
     <div class="buttons">
-      <button id="yes">Sorry accepted❤️</button>
+      <button id="yes">Sorry accepted ❤️</button>
       <button id="no">Sorry not accepted</button>
     </div>
   </div>
@@ -287,24 +288,25 @@
     "Please... ma afno galti bujhechu 💔"
   ];
 
+  // ===== CLEAN MEMORIES (fixed) =====
   const memories = [
-  { 
-    img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg", 
-    text: "Remember this smile? 🥺" 
-  },
-  { 
-    img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg", 
-    text: "Us against the world..." 
-  },
-  { 
-    img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg", 
-    text: "That day was special ❤️" 
-  },
-  { 
-    img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg", 
-    text: "I miss this version of us" 
-  }
-];
+    {
+      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg",
+      text: "Remember this smile? 🥺"
+    },
+    {
+      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg",
+      text: "Us against the world..."
+    },
+    {
+      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg",
+      text: "That day was special ❤️"
+    },
+    {
+      img: "https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg",
+      text: "I miss this version of us"
+    }
+  ];
 
   const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿","🥺💔"];
   const heartStyles = ["❤️","💖","💕","💗","💓","💘","💝","🖤","💔","✨"];
@@ -412,20 +414,25 @@
     }
   }
 
-  // Polaroid Memory Flash
+  // ===== FIXED POLAROID =====
   function showPolaroid() {
     const mem = memories[Math.floor(Math.random() * memories.length)];
     const div = document.createElement('div');
     div.className = 'polaroid';
-    div.innerHTML = `<img src="\( {mem.img}" alt="memory"><p> \){mem.text}</p>`;
+    div.innerHTML = `
+      <img src="${mem.img}" 
+           alt="memory" 
+           onerror="this.src='https://via.placeholder.com/180x180/ff9a9e/ffffff?text=Memory+❤️'">
+      <p>${mem.text}</p>
+    `;
     document.body.appendChild(div);
+
     setTimeout(() => {
       div.classList.add('hide');
       setTimeout(() => div.remove(), 500);
     }, 2200);
   }
 
-  // Reverse Reject (surprise)
   function tryReverseReject() {
     if (rejects >= 7 && Math.random() < 0.35) {
       noBtn.innerHTML = "I can't say no... 🥺";
@@ -441,11 +448,9 @@
     if (isTyping) return;
     rejects++;
 
-    // Heartbeat pulse
     document.body.classList.add('heartbeat-pulse');
     setTimeout(() => document.body.classList.remove('heartbeat-pulse'), 700);
 
-    // Fake typing
     isTyping = true;
     message.innerHTML = `<span class="typing">Baby is typing...</span>`;
     
@@ -468,7 +473,6 @@
       updateIntensity();
       tryReverseReject();
 
-      // Polaroid every 3rd reject
       if (rejects % 3 === 0) {
         setTimeout(showPolaroid, 600);
       }
@@ -501,7 +505,6 @@
     }
   }
 
-  // Typewriter for love letter
   function typeLoveLetter(text, element) {
     element.innerHTML = "";
     let i = 0;
