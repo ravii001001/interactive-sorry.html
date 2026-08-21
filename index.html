@@ -2,7 +2,7 @@
 <html lang="ne">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>For My Love ❤️</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,77 +12,134 @@
     justify-content: center;
     align-items: center;
     background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', system-ui, sans-serif;
     padding: 20px;
     overflow-x: hidden;
     position: relative;
+    transition: background 0.8s ease;
   }
+  body.level-2 {
+    background: linear-gradient(135deg, #ff8a80, #f48fb1, #e1bee7);
+  }
+  body.level-3 {
+    background: linear-gradient(135deg, #e57373, #f06292, #ba68c8);
+  }
+  body.level-4 {
+    background: linear-gradient(135deg, #c62828, #ad1457, #6a1b9a);
+  }
+  body.last-warning {
+    background: linear-gradient(135deg, #4a148c, #311b92, #1a237e);
+  }
+
   .hearts-bg, .balloons-bg {
     position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none; z-index: 1; overflow: hidden;
   }
-  .heart, .balloon {
+  .heart, .balloon, .broken-heart {
     position: absolute;
     animation: fall linear infinite;
-    opacity: 0.75;
+    opacity: 0.8;
   }
   .balloon {
-    font-size: 14px; font-weight: 600;
+    font-size: 13px; font-weight: 600;
     color: #e91e63;
+    background: rgba(255,255,255,0.7);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .broken-heart {
+    font-size: 22px;
+    opacity: 0.9;
   }
   @keyframes fall {
-    0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.8; }
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.85; }
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
   }
+
   .container {
     text-align: center;
     background: rgba(255,255,255,0.97);
-    padding: 28px 20px;
+    padding: 26px 18px;
     border-radius: 28px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.13);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     max-width: 400px; width: 100%;
     position: relative; z-index: 10;
+    transition: all 0.4s ease;
+  }
+  body.last-warning .container {
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 0 30px rgba(233,30,99,0.4);
+  }
+
+  .photos {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 12px;
   }
   .photo {
-    width: 125px; height: 125px;
+    width: 110px; height: 110px;
     border-radius: 50%; object-fit: cover;
     border: 4px solid #e91e63;
     box-shadow: 0 8px 20px rgba(233,30,99,0.3);
-    margin-bottom: 14px;
+    animation: heartbeat 1.5s ease-in-out infinite;
   }
-  h1 { color: #e91e63; font-size: 23px; margin-bottom: 10px; }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+
+  h1 { color: #e91e63; font-size: 22px; margin-bottom: 10px; }
   #message {
     color: #444; font-size: 15px;
-    margin-bottom: 12px; line-height: 1.5; min-height: 48px;
+    margin-bottom: 10px; line-height: 1.55; min-height: 52px;
   }
-  #rejectText {
+  #rejectText, .guilt-counter {
     background: #ffe6ee;
     color: #e91e63;
-    font-size: 16px; font-weight: 700;
-    padding: 8px 16px; border-radius: 50px;
-    display: none;
-    margin: 8px 0 14px;
+    font-size: 14px; font-weight: 700;
+    padding: 7px 16px; border-radius: 50px;
+    margin: 6px 4px;
+    display: inline-block;
   }
+  .guilt-counter {
+    background: #fce4ec;
+  }
+
   .buttons {
     display: flex;
     justify-content: center;
     gap: 12px;
     flex-wrap: wrap;
+    margin-top: 12px;
   }
   button {
-    padding: 12px 20px; font-size: 15px;
+    padding: 12px 22px; font-size: 15px;
     border: none; border-radius: 50px;
     cursor: pointer; font-weight: 600;
     color: white; background: #e91e63;
+    transition: all 0.3s ease;
+    user-select: none;
   }
   button:hover { background: #c2185b; }
-  #no { position: relative; }
+  #yes {
+    box-shadow: 0 0 15px rgba(233,30,99,0.4);
+  }
+  #yes.growing {
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.07); }
+  }
+  #no { position: relative; z-index: 20; }
   .hidden { display: none !important; }
+
   .reaction {
     position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    font-size: 65px; z-index: 9999;
+    font-size: 60px; z-index: 9999;
     pointer-events: none;
     animation: pop 1.2s ease forwards;
   }
@@ -102,6 +159,13 @@
   @keyframes confettiFall {
     to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
   }
+  .last-warning-text {
+    color: #c62828;
+    font-weight: 800;
+    font-size: 16px;
+    margin: 8px 0;
+    display: none;
+  }
 </style>
 </head>
 <body>
@@ -117,22 +181,26 @@
   </audio>
 
   <div class="container" id="main">
-    <img src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg" class="photo" alt="Her">
-   <img src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg" class="photo" alt="Her">
-   <h1>Baby... 🥺</h1>
+    <div class="photos">
+      <img src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/shreya.jpeg" class="photo" alt="Her">
+      <img src="https://raw.githubusercontent.com/ravii001001/interactive-sorry.html/main/ravi.jpeg" class="photo" alt="Him">
+    </div>
+    <h1 id="mainTitle">Baby... 🥺</h1>
     <p id="message">Maile galti gare, maaf gara na.<br>Timi risako dekhera mann dukhiraxa.</p>
 
-    <div id="rejectText"></div>
+    <div id="rejectText" style="display:none;"></div>
+    <div class="guilt-counter" id="guiltCounter" style="display:none;"></div>
+    <div class="last-warning-text" id="lastWarning">⚠️ This is really hurting me...</div>
 
     <div class="buttons">
-      <button id="yes">Sorry accepted❤️</button>
+      <button id="yes">Sorry accepted ❤️</button>
       <button id="no">Sorry not accepted</button>
     </div>
   </div>
 
   <div class="container hidden" id="love">
     <h1 id="loveTitle">I Love You So Much 💕</h1>
-    <p id="loveMessage"></p>
+    <p id="loveMessage" style="font-size:15px; line-height:1.6; color:#444;"></p>
   </div>
 
 <script>
@@ -142,12 +210,15 @@
   const love = document.getElementById('love');
   const message = document.getElementById('message');
   const rejectText = document.getElementById('rejectText');
+  const guiltCounter = document.getElementById('guiltCounter');
   const heartsBg = document.getElementById('heartsBg');
   const balloonsBg = document.getElementById('balloonsBg');
   const sadMusic = document.getElementById('sadMusic');
   const romanticMusic = document.getElementById('romanticMusic');
   const loveTitle = document.getElementById('loveTitle');
   const loveMessage = document.getElementById('loveMessage');
+  const lastWarning = document.getElementById('lastWarning');
+  const mainTitle = document.getElementById('mainTitle');
 
   let rejects = 0;
 
@@ -161,13 +232,16 @@
     "Baby please... maaf gara na 💔<br>Ma feri galti gardina.",
     "Timro muskan nai mero happiness ho.<br>Please forgive me 😢",
     "Last time... please maaf gara 😭❤️",
-    "Maile sabai galti accept garchu.<br>Please ek chance deu na 🥺"
+    "Maile sabai galti accept garchu.<br>Please ek chance deu na 🥺",
+    "Yo reject le mero mann dherai dukhiraxa 😭",
+    "Please... ma afno galti bujhechu 💔"
   ];
 
-  const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿"];
+  const reactions = ["💔😢","😭💔","💔🥺","😢💔😭","🖤😭","💔😩","😭🖤","💔😿","🥺💔"];
   const heartStyles = ["❤️","💖","💕","💗","💓","💘","💝","🖤","💔","✨"];
-  const balloonTexts = ["I ❤️ You", "Sorry 🥺", "Maaf gara","please shreyaa","Forgive me", "Love you"];
+  const balloonTexts = ["I ❤️ You", "Sorry 🥺", "Maaf gara", "please shreyaa", "Forgive me", "Love you"];
 
+  // Decorative falling hearts
   setInterval(() => {
     const heart = document.createElement('div');
     heart.classList.add('heart');
@@ -179,6 +253,7 @@
     setTimeout(() => heart.remove(), 7000);
   }, 400);
 
+  // Balloons
   setInterval(() => {
     const b = document.createElement('div');
     b.classList.add('balloon');
@@ -187,56 +262,108 @@
     b.style.animationDuration = (Math.random()*5 + 4) + 's';
     balloonsBg.appendChild(b);
     setTimeout(() => b.remove(), 9000);
-  }, 1200);
+  }, 1300);
 
   function playMusic(type) {
     sadMusic.pause();
     romanticMusic.pause();
-
     if (type === 'sad') {
       sadMusic.currentTime = 0;
-      sadMusic.volume = 0.45;
+      sadMusic.volume = 0.4;
       sadMusic.play().catch(()=>{});
     } else {
       romanticMusic.currentTime = 0;
-      romanticMusic.volume = 0.5;
+      romanticMusic.volume = 0.45;
       romanticMusic.play().catch(()=>{});
     }
   }
 
-  function showReaction() {
+  function showReaction(emoji = null) {
     const el = document.createElement('div');
     el.className = 'reaction';
-    el.innerHTML = reactions[Math.floor(Math.random()*reactions.length)];
+    el.innerHTML = emoji || reactions[Math.floor(Math.random()*reactions.length)];
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1300);
   }
 
+  function spawnBrokenHearts(count = 8) {
+    for (let i = 0; i < count; i++) {
+      const h = document.createElement('div');
+      h.className = 'broken-heart';
+      h.innerHTML = "💔";
+      h.style.left = Math.random()*100 + 'vw';
+      h.style.fontSize = (Math.random()*16 + 18) + 'px';
+      h.style.animationDuration = (Math.random()*3 + 2.5) + 's';
+      heartsBg.appendChild(h);
+      setTimeout(() => h.remove(), 5500);
+    }
+  }
+
   function moveButton() {
-    noBtn.style.transition = '0.1s';
-    noBtn.style.transform = 'translateX(-8px)';
-    setTimeout(() => noBtn.style.transform = 'translateX(8px)', 80);
-    setTimeout(() => noBtn.style.transform = 'translateX(-5px)', 160);
-    setTimeout(() => noBtn.style.transform = 'translateX(0)', 240);
+    noBtn.style.transition = '0.08s';
+    noBtn.style.transform = 'translateX(-10px)';
+    setTimeout(() => noBtn.style.transform = 'translateX(10px)', 70);
+    setTimeout(() => noBtn.style.transform = 'translateX(-6px)', 140);
+    setTimeout(() => noBtn.style.transform = 'translateX(0)', 210);
 
     setTimeout(() => {
-      const maxX = window.innerWidth - 170;
+      const maxX = window.innerWidth - 160;
       const maxY = window.innerHeight - 70;
       noBtn.style.position = 'fixed';
-      noBtn.style.left = Math.max(10, Math.random()*maxX) + 'px';
-      noBtn.style.top = Math.max(10, Math.random()*maxY) + 'px';
+      noBtn.style.left = Math.max(8, Math.random() * maxX) + 'px';
+      noBtn.style.top = Math.max(8, Math.random() * maxY) + 'px';
       noBtn.style.zIndex = '9999';
-    }, 300);
+    }, 280);
+  }
+
+  function updateYesSize() {
+    const scale = 1 + Math.min(rejects * 0.07, 0.65);
+    yesBtn.style.transform = `scale(${scale})`;
+    yesBtn.classList.add('growing');
+    if (rejects >= 8) {
+      yesBtn.innerHTML = "Please accept 🥺❤️";
+    }
+    if (rejects >= 12) {
+      yesBtn.innerHTML = "Maaf gara na 😭";
+    }
+  }
+
+  function updateIntensity() {
+    document.body.classList.remove('level-2','level-3','level-4','last-warning');
+    lastWarning.style.display = 'none';
+
+    if (rejects >= 12) {
+      document.body.classList.add('last-warning');
+      lastWarning.style.display = 'block';
+      mainTitle.innerHTML = "Please... 😭";
+    } else if (rejects >= 8) {
+      document.body.classList.add('level-4');
+      mainTitle.innerHTML = "It hurts... 💔";
+    } else if (rejects >= 5) {
+      document.body.classList.add('level-3');
+      mainTitle.innerHTML = "Baby please... 🥺";
+    } else if (rejects >= 3) {
+      document.body.classList.add('level-2');
+    }
   }
 
   function handleReject() {
-    rejects = rejects + 1;
+    rejects++;
     rejectText.style.display = 'inline-block';
     rejectText.innerHTML = "You rejected " + rejects + (rejects > 1 ? " times" : " time") + " 😔";
-    message.innerHTML = messages[Math.min(rejects, messages.length - 1)];
+
+    guiltCounter.style.display = 'inline-block';
+    guiltCounter.innerHTML = "💔 You broke my heart " + rejects + " times";
+
+    const msgIndex = Math.min(rejects, messages.length - 1);
+    message.innerHTML = messages[msgIndex];
+
     showReaction();
+    spawnBrokenHearts(rejects > 6 ? 14 : 8);
     moveButton();
     playMusic('sad');
+    updateYesSize();
+    updateIntensity();
   }
 
   noBtn.addEventListener('click', function(e) {
@@ -250,16 +377,18 @@
   noBtn.addEventListener('mouseover', handleReject);
 
   function createConfetti() {
-    const colors = ['#e91e63','#ff9a9e','#fbc2eb','#ffeb3b','#4caf50','#2196f3'];
-    for (let i = 0; i < 120; i++) {
+    const colors = ['#e91e63','#ff9a9e','#fbc2eb','#ffeb3b','#4caf50','#2196f3','#ff4081'];
+    for (let i = 0; i < 140; i++) {
       const conf = document.createElement('div');
       conf.className = 'confetti';
       conf.style.left = Math.random()*100 + 'vw';
       conf.style.background = colors[Math.floor(Math.random()*colors.length)];
-      conf.style.animationDuration = (Math.random()*2 + 2) + 's';
-      conf.style.animationDelay = Math.random()*0.5 + 's';
+      conf.style.width = (Math.random()*8 + 6) + 'px';
+      conf.style.height = conf.style.width;
+      conf.style.animationDuration = (Math.random()*2.5 + 2) + 's';
+      conf.style.animationDelay = Math.random()*0.6 + 's';
       document.body.appendChild(conf);
-      setTimeout(() => conf.remove(), 4000);
+      setTimeout(() => conf.remove(), 4500);
     }
   }
 
@@ -274,24 +403,27 @@
     } else if (rejects <= 6) {
       loveTitle.innerHTML = "You made me wait... 🥺";
       loveMessage.innerHTML = `Jati choti reject gare pani maile wait gare.<br>Thank you for finally forgiving me.<br>I love you more than anything 💕<br><br><strong>Forever yours ❤️</strong>`;
-    } else {
+    } else if (rejects <= 11) {
       loveTitle.innerHTML = "You really tested me 😭";
       loveMessage.innerHTML = rejects + ` times reject gareu... tara maile give up garina.<br>That's how much I love you.<br>Please don't make me wait again 🥺❤️<br><br><strong>Forever & Always yours</strong>`;
+    } else {
+      loveTitle.innerHTML = "Finally... 😭❤️";
+      loveMessage.innerHTML = `Timi le ${rejects} choti reject garyau...<br>Tara maile hareko chaina.<br>Because I love you more than my ego.<br><br><strong>Now please stay with me forever 💕</strong>`;
     }
 
     createConfetti();
 
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 70; i++) {
       setTimeout(() => {
         const heart = document.createElement('div');
         heart.classList.add('heart');
         heart.innerHTML = heartStyles[Math.floor(Math.random()*heartStyles.length)];
         heart.style.left = Math.random()*100 + 'vw';
-        heart.style.fontSize = (Math.random()*20 + 16) + 'px';
+        heart.style.fontSize = (Math.random()*22 + 16) + 'px';
         heart.style.animationDuration = (Math.random()*3 + 2) + 's';
         heartsBg.appendChild(heart);
         setTimeout(() => heart.remove(), 5000);
-      }, i * 60);
+      }, i * 50);
     }
   });
 </script>
